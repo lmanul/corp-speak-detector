@@ -1,0 +1,347 @@
+<html>
+<head>
+<title>Corp Speak Detector</title>
+<link rel="icon" href="favicon.png">
+<script>
+  var COMMON_WORDS = [
+    'a',
+    'an',
+    'am',
+    'and',
+    'are',
+    'as',
+    'at',
+    'for',
+    'from',
+    'in',
+    'is',
+    'it',
+    'of',
+    'on',
+    'out',
+    'so',
+    'that',
+    'the',
+    'this',
+    'to',
+    'what',
+    'where'];
+
+  var BUZZ_PREFIXES = [
+   '200%',
+   'actionable',
+   'advanc',
+   'affordable',
+   'all-hands',
+   'amaz',
+   'amplif',
+   'announc',
+   'approach',
+   'asset',
+   'as a company',
+   'award-winning',
+   'belief',
+   'believe',
+   'best-in-class',
+   'best practices',
+   'bleeding-edge',
+   'bottleneck',
+   'brainstorm',
+   'buy-in',
+   'cannibaliz',
+   'centraliz',
+   'certified',
+   'change',
+   'change the world',
+   'consumer',
+   'commit',
+   'competen',
+   'concept',
+   'cooperat',
+   'core',
+   'corporat',
+   'creativ',
+   'critical',
+   'cross-pollination',
+   'customer',
+   'deep',
+   'deliverable',
+   'dig deeper',
+   'double down',
+   'ecosystem',
+   'empower',
+   'evolutionary',
+   'excellen',
+   'excite',
+   'expertise',
+   'extraordinary',
+   'focus',
+   'forward',
+   'go-to',
+   'grateful',
+   'ground-breaking',
+   'heavy duty',
+   'highly',
+   'holistic',
+   'humbled',
+   'impact',
+   'incentiv',
+   'incredibl',
+   'innovative',
+   'inspir',
+   'interoperable',
+   'just one of many',
+   'lead',
+   'learnings',
+   'leverage',
+   'life-changing',
+   'low-hanging fruit',
+   'long-tail',
+   'major',
+   'marketing',
+   'meaningful',
+   'metrics',
+   'mission',
+   'momentum',
+   'moonshot',
+   'motivat',
+   'move the needle',
+   'multicomponent',
+   'multilevel',
+   'next level',
+   'next step',
+   'nexus',
+   'organic',
+   'organization',
+   'opportunity',
+   'outreach',
+   'outside the box',
+   'outsourc',
+   'paradigm',
+   'partnering',
+   'paus',
+   'platform',
+   'proactive',
+   'process',
+   'progress',
+   'punt',
+   'raise awareness',
+   'resources',
+   'restructure',
+   'revamp',
+   'revenue',
+   'robust',
+   'scalab',
+   'seamless',
+   'self-contained',
+   'signal',
+   'significant',
+   'stakeholder',
+   'strateg',
+   'stress-test',
+   'structur',
+   'success',
+   'synerg',
+   'tiger team',
+   'tip of the iceberg',
+   'thoughtful',
+   'transformative',
+   'transition',
+   'tremendous',
+   'two-fold',
+   'universal',
+   'unprecedented',
+   'update',
+   'value',
+   'vertical',
+   'very lucky',
+   'wide range'];
+
+  var VISUALS = [
+    [99, ['pink', 'Hellish']],
+    [70, ['maroon', 'Ludicrous']],
+    [45, ['purple', 'Hazardous']],
+    [20, ['darkorange', 'Dangerous']],
+    [10, ['orange', 'Worrysome']],
+    [5, ['gold', 'Acceptable']],
+    [3, ['yellowgreen', 'Healthy']],
+    [0, ['green', 'Very Healthy']]];
+
+  var outputHtml = '';
+  var totalTokens = 0;
+  var buzzTokens = 0;
+
+  function onload() {
+    document.getElementById('in').oninput = onTextChanged;
+    // If some buzz words have hyphens, also add the same thing with a space.
+    for (var i = 0; i < BUZZ_PREFIXES.length; i++) {
+      if (BUZZ_PREFIXES[i].includes('-')) {
+        BUZZ_PREFIXES.push(BUZZ_PREFIXES[i].replace('-', ' '));
+      }
+    }
+    processInput('');
+  }
+
+  function onTextChanged(e) {
+    var input = e.target.value;
+    processInput(e.target.value);
+    document.getElementById('out').innerHTML = outputHtml;
+  }
+
+  function advanceToNextSpace(text, pos) {
+    while(pos < text.length && text[pos] != ' ') {
+      pos++;
+    }
+    return pos;
+  }
+
+  function processInput(text) {
+    buzzTokens = 0;
+    totalTokens = 0;
+    var comboPoints = 0;
+    outputHtml = '';
+    text = text.replace('\n', ' ');
+    for (var pos = 0; pos < text.length; pos++) {
+      if (pos > 0) {
+        outputHtml += ' ';
+      }
+      var matched = false;
+      for (var i = 0; i < BUZZ_PREFIXES.length; i++) {
+        var prefix = BUZZ_PREFIXES[i];
+        if (text.substring(pos).toLowerCase().startsWith(prefix)) {
+          matched = true;
+          var startPos = pos;
+          buzzTokens++;
+          totalTokens++;
+          if (comboPoints > 0) {
+            buzzTokens += 3 * comboPoints;
+          }
+          pos += prefix.length;
+          pos = advanceToNextSpace(text, pos);
+          var clazz = (comboPoints > 1) ? 'm3' : (comboPoints > 0 ? 'm2' : 'm');
+          var title = (comboPoints > 1) ? 'Combo +2!' : (comboPoints > 0 ? 'Combo +1!' : 'Quaaack!');
+          outputHtml += '<span class="' + clazz + '" title="' + title + '">' + text.substring(startPos, pos) + '</span>';
+          comboPoints++;
+          break;
+        }
+      }
+      var tentativePos = advanceToNextSpace(text, pos);
+      for (var i = 0; i < COMMON_WORDS.length; i++) {        
+        var commonWord = COMMON_WORDS[i];
+        if (commonWord == text.substring(pos, tentativePos).toLowerCase()) {
+          startPos = pos;
+          pos = tentativePos;
+          // Common word, don't count anything.
+          outputHtml += '<span class="c">' + text.substring(startPos, pos) + '</span>';
+          comboPoints = 0;
+          matched = true;
+        }
+      }
+      if (!matched) {
+        // No match.
+        totalTokens++;
+        comboPoints = 0;
+        var startPos = pos;
+        pos = advanceToNextSpace(text, pos);
+        outputHtml += text.substring(startPos, pos);
+      }
+    }
+    var ratio = totalTokens == 0 ? 0 : buzzTokens / totalTokens;
+    document.getElementById('result').innerHTML = getResult(ratio);
+  }
+
+  function getColorAndWord(percentage) {
+    for (var i = 0; i < VISUALS.length; i++) {
+      if (percentage >= VISUALS[i][0]) {
+        return VISUALS[i][1];
+      }
+    }
+  }
+
+  function getResult(ratio) {
+    var percentage = Math.min(Math.floor(ratio * 100), 100);
+    var visual = getColorAndWord(percentage);
+    document.getElementById('result').style.backgroundColor = visual[0];
+    return '' + percentage + '% – ' + visual[1];
+  }
+
+</script>
+<style>
+html {
+  box-sizing: border-box;
+  font-family: Arial;
+}
+
+body {
+  text-align: center;
+}
+
+#in, #out, #result {
+  display: inline-block;
+}
+
+#in, #out {
+  height: 70%;
+  margin: 2ex;
+  vertical-align: top;
+  width: 45%;
+}
+
+#in {
+  padding: 2ex;
+}
+
+#out {
+  overflow: auto;
+  text-align: left;
+}
+
+#result {
+  border: 1px solid #555;
+  color: white;
+  font-size: 200%;
+  font-weight: 600;
+  margin: 2ex;
+  padding: 30px;
+  width: 50%;
+}
+
+.m {
+  color: darkorange;
+}
+
+.m2 {
+  color: #c00;
+}
+
+.m3 {
+  color: purple;
+}
+
+.c {
+  color: #ccc;
+}
+
+#footer {
+  color: #ccc;
+  font-size: 80%;
+}
+
+#footer a {
+  color: #888;
+}
+
+#footer img {
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+</style>
+</head>
+<body onload="onload();">
+  <textarea id="in" placeholder="Paste in or type the text to analyze"></textarea>
+  <div id="out"></div>
+  <div id="result"></div>
+  <div id="footer"><img src="favicon.png" width="32" /> Send feedback (e.g. bugs or words that you think should be flagged) to <a href="mailto:manucornet@google.com">manucornet@</a></div>
+</body>
+</html>
