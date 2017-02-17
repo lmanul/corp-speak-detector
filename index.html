@@ -55,6 +55,7 @@
    'certified',
    'change',
    'change the world',
+   'cloud',
    'consumer',
    'commit',
    'competen',
@@ -67,7 +68,8 @@
    'cross-pollination',
    'customer',
    'deep',
-   'deliverable',
+   'deliver',
+   'deploy',
    'dig deeper',
    'double down',
    'ecosystem',
@@ -79,6 +81,7 @@
    'experience',
    'expertise',
    'extraordinary',
+   'flexib',
    'focus',
    'forward',
    'generational',
@@ -92,6 +95,7 @@
    'impact',
    'incentiv',
    'incredibl',
+   'initiative',
    'innovative',
    'inspir',
    'interoperable',
@@ -152,7 +156,8 @@
    'tiger team',
    'tip of the iceberg',
    'thoughtful',
-   'transformative',
+   'transformati',
+   'transaction',
    'transition',
    'tremendous',
    'two-fold',
@@ -222,12 +227,12 @@
           buzzTokens++;
           totalTokens++;
           if (comboPoints > 0) {
-            buzzTokens += 3 * comboPoints;
+            buzzTokens += Math.pow(comboPoints + 1, 2);
           }
           pos += prefix.length;
           pos = advanceToNextSpace(text, pos);
-          var clazz = (comboPoints > 1) ? 'm3' : (comboPoints > 0 ? 'm2' : 'm');
-          var title = (comboPoints > 1) ? 'Combo +2!' : (comboPoints > 0 ? 'Combo +1!' : 'Quaaack!');
+          var clazz = 'm' + (comboPoints > 0 ? comboPoints : '');
+          var title = (comboPoints > 0) ? 'Combo +' + comboPoints : 'Quaaack!';
           outputHtml += '<span class="' + clazz + '" title="' + title + '">' + text.substring(startPos, pos) + '</span>';
           comboPoints++;
           break;
@@ -317,13 +322,18 @@ body {
   color: darkorange;
 }
 
-.m2 {
+.m1 {
   color: #c00;
 }
 
-.m3 {
+.m2 {
   color: purple;
 }
+
+.m3, .m4, .m5 {
+  color: maroon;
+}
+
 
 .c {
   color: #ccc;
