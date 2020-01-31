@@ -116,6 +116,7 @@
     'insight',
     'inspir',
     'interoperable',
+    'intuitive',
     'just one of many',
     'lead',
     'leap forward',
@@ -129,6 +130,7 @@
     'meaningful',
     'metrics',
     'mission',
+    'modern',
     'momentum',
     'moonshot',
     'motivat',
@@ -161,6 +163,7 @@
     'push the boundaries',
     'push the envelope',
     'push the limits',
+    'qualitative',
     'raise awareness',
     're-accommodat',
     'reaccommodat',
@@ -180,6 +183,7 @@
     'signal',
     'significant',
     'stakeholder',
+    'state-of-the-art',
     'strateg',
     'streamlin',
     'stress-test',
@@ -234,8 +238,9 @@
         BUZZ_PREFIXES.push(BUZZ_PREFIXES[i].replace('-', ' '));
       }
     }
-    processInput('');
-    document.getElementById('in').focus();
+    let inputEl = document.getElementById('in');
+    processInput(inputEl.value);
+    inputEl.focus();
   }
 
   function onTextChanged(e) {
